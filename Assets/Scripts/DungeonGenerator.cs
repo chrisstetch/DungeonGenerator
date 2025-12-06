@@ -16,7 +16,7 @@ public class DungeonGenerator : MonoBehaviour
     public int maxRoomHeight = 10;
 
     // List to store generated rooms
-    private List<RectInt> rooms = new List<RectInt>();
+    private List<Room> rooms = new List<Room>();
 
     // Start is called before the first frame update
     void Start()
@@ -28,8 +28,8 @@ public class DungeonGenerator : MonoBehaviour
     void Update()
     {
      // Regenerate rooms for testing
-     if (Input.GetKeyDown(KeyCode.Space))
-        {
+     if (Input.GetKeyDown(KeyCode.Space)) 
+        { 
             GenerateDungeon();
         }   
     }
@@ -55,7 +55,7 @@ public class DungeonGenerator : MonoBehaviour
             int y = Random.Range(0, gridHeight - h);
 
             // Create new room object
-            roomCount newRoom = new roomCount(x, y, w, h);
+            Room newRoom = new Room(x, y, w, h);
 
             // Check overlaps
             if(!IsOverlapping(newRoom))
@@ -69,17 +69,45 @@ public class DungeonGenerator : MonoBehaviour
     private bool IsOverlapping(Room newRoom)
     {
         // Padding so rooms don't touch
-        Room padded  = new Room(rooms.x - 1, rooms.y - 1, room.width + 2, rooms.height + 2);
-
-        if (padded.Overlaps(newRoom))
+        foreach (var room in rooms)
         {
-            return true;
+            Room padded = new Room(room.x - 1, room.y - 1, room.width + 2, room.height + 2);
+
+            if (padded.Overlaps(newRoom))
+            {
+                return true;
+            }
         }
         return false;
     }
 
-    private void DrawGizmos()
+    private void OnDrawGizmos()
     {
+        // Draw map border
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireCube(new Vector3(gridWidth / 2f, gridHeight / 2f, 0),
+            new Vector3(gridWidth, gridHeight, 0));
+
+        // Draw the rooms
+        if (rooms != null)
+        {
+            foreach (var room in rooms)
+            {
+                Vector3 center = new Vector3(room.x + room.width / 2f, room.y + room.height / 2f, 0);
+                Vector3 size = new Vector3(room.width, room.height, 0);
+
+                // Draw green box
+                Gizmos.color = new Color(0, 1, 0, 0.3f);
+                Gizmos.DrawCube(center, size);
+                Gizmos.color = Color.green;
+                Gizmos.DrawWireCube(center, size);
+
+                // Draw blue center dot
+                Gizmos.color = Color.blue;
+                Vector2Int c = room.GetCenter();
+                Gizmos.DrawSphere(new Vector3(c.x, c.y, 0), 0.5f);
+            }
+        }
 
     }
 }
