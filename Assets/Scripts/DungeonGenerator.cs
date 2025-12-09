@@ -1,19 +1,24 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Tilemaps;
 
 public class DungeonGenerator : MonoBehaviour
 {
+    [Header("References")]
+    public Tilemap tilemap;
+    public TileBase floorTile;
+
     [Header("Dungeon Settings")]
     public int gridWidth = 50;
     public int gridHeight = 50;
 
     [Header("Room Settings")]
     public int roomCount = 10;
-    public int minRoomWidth = 4;
-    public int maxRoomWidth = 10;
-    public int minRoomHeight = 4;
-    public int maxRoomHeight = 10;
+    public int minRoomWidth = 5;
+    public int maxRoomWidth = 15;
+    public int minRoomHeight = 5;
+    public int maxRoomHeight = 15;
 
     // List to store generated rooms
     private List<Room> rooms = new List<Room>();
@@ -36,6 +41,9 @@ public class DungeonGenerator : MonoBehaviour
 
     public void GenerateDungeon()
     {
+        // Clear old tiles
+        tilemap.ClearAllTiles();
+
         // Clear old rooms
         rooms.Clear();
 
@@ -62,7 +70,15 @@ public class DungeonGenerator : MonoBehaviour
             {
                 rooms.Add(newRoom);
             }
+
+            // Loop through list of rooms and paint them
+            foreach(Room room in rooms)
+            {
+                PaintRoom(room);
+            }
         }
+
+
         Debug.Log($"Generated {rooms.Count} rooms.");
     }
 
@@ -79,6 +95,17 @@ public class DungeonGenerator : MonoBehaviour
             }
         }
         return false;
+    }
+
+    private void PaintRoom(Room room)
+    {
+        for (int x = room.x; x < room.x + room.width; x++)
+        {
+            for (int y = room.y; y < room.y + room.height; y++)
+            {
+                tilemap.SetTile(new Vector3Int(x, y, 0), floorTile);
+            }
+        }
     }
 
     private void OnDrawGizmos()
