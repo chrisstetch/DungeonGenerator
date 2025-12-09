@@ -70,15 +70,19 @@ public class DungeonGenerator : MonoBehaviour
             {
                 rooms.Add(newRoom);
             }
-
-            // Loop through list of rooms and paint them
-            foreach(Room room in rooms)
-            {
-                PaintRoom(room);
-            }
         }
 
+        // Loop through list of rooms and paint them
+        foreach (Room room in rooms)
+        {
+            PaintRoom(room);
+        }
 
+        // Connect rooms
+        for (int i = 0; i < rooms.Count - 1; i++)
+        {
+            CreateCorridor(rooms[i], rooms[i + 1]);
+        }
         Debug.Log($"Generated {rooms.Count} rooms.");
     }
 
@@ -95,6 +99,31 @@ public class DungeonGenerator : MonoBehaviour
             }
         }
         return false;
+    }
+
+    private void CreateCorridor(Room roomA, Room roomB)
+    {
+        // Get centers of room pairs
+        Vector2Int start = roomA.GetCenter();
+        Vector2Int end = roomB.GetCenter();
+
+        // --- HORIZONTAL ---
+        int directionX = (end.x > start.x) ? 1 : -1;
+
+        // Draw horizontal line
+        for (int x = start.x; x != end.x + directionX; x += directionX)
+        {
+            tilemap.SetTile(new Vector3Int(x, start.y, 0), floorTile);
+        }
+
+        // --- VERTICAL ---
+        int directionY = (end.y > start.y) ? 1 : -1;
+
+        // Draw vertical line
+        for (int y = start.y; y!= end.y + directionY; y += directionY)
+        {
+            tilemap.SetTile(new Vector3Int(end.x, y, 0), floorTile);
+        }
     }
 
     private void PaintRoom(Room room)
