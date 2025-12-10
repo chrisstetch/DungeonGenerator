@@ -9,6 +9,7 @@ public class DungeonGenerator : MonoBehaviour
     [Header("References")]
     public Tilemap tilemap;
     public TileBase floorTile;
+    public TileBase wallTile;
 
     [Header("Dungeon Settings")]
     public int gridWidth = 100;
@@ -127,6 +128,9 @@ public class DungeonGenerator : MonoBehaviour
                 CreateCorridor(rooms[i], rooms[i + 1]);
             }
         }
+        // 4. PAINT WALLS
+        PaintWalls();
+
         Debug.Log($"Generated {rooms.Count} rooms.");
     }
 
@@ -191,13 +195,112 @@ public class DungeonGenerator : MonoBehaviour
 
     private void PaintRoom(Room room)
     {
-        for (int x = room.x; x < room.x + room.width; x++)
-        {
-            for (int y = room.y; y < room.y + room.height; y++)
+
+        // 1. Paint main room
+        PaintRect(room.x, room.y, room.width, room.height);
+        /*
+        //  2. Wing logic
+        if (Random.value > 0.5f) {
+
+            // Pick random direction vector
+            Vector2Int[] directions = { Vector2Int.up, Vector2Int.down, Vector2Int.right, Vector2Int.left };
+            Vector2Int dir = directions[Random.Range(0, 4)];
+
+            int wingW, wingH;
+            int wingX = room.x;
+            int wingY = room.y;
+
+            // Side to attach wing to
+            int side = Random.Range(0, 4);
+
+            // Alignment (T shape or L shape)
+            int align = Random.Range(0, 2);
+
+            // Wing sizes based on axis
+            // Vertical
+            if (dir.y != 0)
             {
-                tilemap.SetTile(new Vector3Int(x, y, 0), floorTile);
+                wingW = Mathf.Max(3, Mathf.RoundToInt(room.width * 0.66f));
+                wingH = Mathf.Max(3, Mathf.RoundToInt(room.height * 0.50f));
+            }
+            // Horizontal
+            else
+            {
+                wingW = Mathf.Max(3, Mathf.RoundToInt(room.width * 0.50f));
+                wingH = Mathf.Max(3, Mathf.RoundToInt(room.height * 0.66f));
+            }
+
+            // Vertical wing
+            if (dir.y != 0)
+            {
+                // X position
+                if (align == 1) wingX = room.x + (room.width - wingW) / 2;
+                else wingX = room.x;
+
+                // Y position
+                wingY = (dir.y > 0) ? (room.y + room.height) : (room.y - wingH);
+
+            }
+            // Horizontal wing
+            else
+            {
+                // Y Position
+                if (align == 1) wingY = room.y + (room.height - wingH) / 2;
+                else wingY = room.y;
+
+                // X position
+                wingX = (dir.x > 0) ? (room.x + room.width) : (room.x - wingW);
+            }
+
+            PaintRect(wingX, wingY, wingW, wingH);
+        }
+        */
+    }
+
+    // Helper to paint walls of rooms
+    private void PaintWalls()
+    {
+        // Get bounds of painted area
+        BoundsInt bounds = tilemap.cellBounds;
+
+        for (int x = bounds.xMin; x <= bounds.xMax; x++)
+        {
+            for (int y = bounds.yMin; y <= bounds.yMax; y++)
+            {
+                Vector3Int pos = new Vector3Int(x, y, 0);
+
+                if (!tilemap.HasTile(pos) && IsNeighborFloor(pos))
+                {
+                    tilemap.SetTile(pos, wallTile);
+                }
             }
         }
+    }
+
+    // Helper to paint rooms and wings
+    private void PaintRect(int startX, int startY, int width, int height)
+    {
+        for (int x = startX; x < startX + width; x++)
+        {
+            for (int y = startY; y < startY + height; y++)
+            {
+                Vector3Int pos = new Vector3Int(x, y, 0);
+                if (!tilemap.HasTile(pos))
+                {
+                    tilemap.SetTile(pos, floorTile);
+                }
+            }
+        }
+    }
+
+    // Helper to check neighbors (Up, Down, Left, Right)
+    private bool IsNeighborFloor(Vector3Int pos)
+    {
+        if (tilemap.GetTile(pos + Vector3Int.up) == floorTile) return true;
+        if (tilemap.GetTile(pos + Vector3Int.down) == floorTile) return true;
+        if (tilemap.GetTile(pos + Vector3Int.left) == floorTile) return true;
+        if (tilemap.GetTile(pos + Vector3Int.right) == floorTile) return true;
+        return false;
     }
 
     private void OnDrawGizmos()
