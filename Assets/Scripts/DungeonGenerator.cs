@@ -21,6 +21,7 @@ public class DungeonGenerator : MonoBehaviour
     public Slider maxWidthSlider;
     public Slider minHeightSlider;
     public Slider maxHeightSlider;
+    public InputField seedInput;
 
     [Header("UI Labels")]
     public Text countLabel;
@@ -71,7 +72,10 @@ public class DungeonGenerator : MonoBehaviour
 
     public void GenerateDungeon()
     {
-        // 1. UPDATE VALUES FROM UI
+        // 1. APPLY SEED
+        InitSeed();
+
+        // 2. UPDATE VALUES FROM UI
         roomCount = (int)roomCountSlider.value;
 
         // Widths
@@ -84,7 +88,7 @@ public class DungeonGenerator : MonoBehaviour
         maxH = (int)maxHeightSlider.value;
         if (maxH < minH) maxH = minH; 
 
-        // 2. CLEAR EVERYTHING
+        // 3. CLEAR EVERYTHING
         tilemap.ClearAllTiles();
         rooms.Clear();
 
@@ -92,7 +96,7 @@ public class DungeonGenerator : MonoBehaviour
         int attempts = 0;
         int maxAttempts = roomCount * 5;
 
-        // 3. GENERATE
+        // 4. GENERATE
         // Keep adding rooms until finished
         while (rooms.Count < roomCount && attempts < maxAttempts)
         {
@@ -128,10 +132,25 @@ public class DungeonGenerator : MonoBehaviour
                 CreateCorridor(rooms[i], rooms[i + 1]);
             }
         }
-        // 4. PAINT WALLS
+        // 5. PAINT WALLS
         PaintWalls();
 
         Debug.Log($"Generated {rooms.Count} rooms.");
+    }
+
+    private void InitSeed()
+    {
+        // Text box for seed
+        if (seedInput != null && seedInput.text.Length > 0)
+        {
+            int seed = seedInput.text.GetHashCode();
+            Random.InitState(seed);
+        }
+        // Use current time to generate seed if no seed entered
+        else
+        {
+            Random.InitState(System.DateTime.Now.Millisecond);
+        }
     }
 
     private bool IsOverlapping(Room newRoom)
@@ -263,9 +282,9 @@ public class DungeonGenerator : MonoBehaviour
         // Get bounds of painted area
         BoundsInt bounds = tilemap.cellBounds;
 
-        for (int x = bounds.xMin; x <= bounds.xMax; x++)
+        for (int x = bounds.xMin - 2; x <= bounds.xMax + 2; x++)
         {
-            for (int y = bounds.yMin; y <= bounds.yMax; y++)
+            for (int y = bounds.yMin - 2; y <= bounds.yMax + 2; y++)
             {
                 Vector3Int pos = new Vector3Int(x, y, 0);
 
