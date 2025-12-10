@@ -10,6 +10,7 @@ public class DungeonGenerator : MonoBehaviour
     public Tilemap tilemap;
     public TileBase floorTile;
     public TileBase wallTile;
+    public Camera mainCamera;
 
     [Header("Dungeon Settings")]
     public int gridWidth = 100;
@@ -29,6 +30,14 @@ public class DungeonGenerator : MonoBehaviour
     public Text maxWidthLabel;
     public Text minHeightLabel;
     public Text maxHeightLabel;
+
+    [Header("Spawning")]
+    public GameObject playerPrefab;
+    public GameObject exitPrefab;
+    public GameObject lootPrefab;
+
+    // Track spawned objects
+    private List<GameObject> spawnedObjects = new List<GameObject>();
 
     // Internal variables
     private int roomCount;
@@ -57,7 +66,7 @@ public class DungeonGenerator : MonoBehaviour
     void Update()
     {
         // UI text updating
-        if (countLabel) countLabel.text = "Max room count: " + roomCountSlider.value;
+        if (countLabel) countLabel.text = "Room count: " + roomCountSlider.value;
         if (minWidthLabel) minWidthLabel.text = "Min width: " + minWidthSlider.value;
         if (maxWidthLabel) maxWidthLabel.text = "Max width: " + maxWidthSlider.value;
         if (minHeightLabel) minHeightLabel.text = "Min height: " + minHeightSlider.value;
@@ -77,6 +86,19 @@ public class DungeonGenerator : MonoBehaviour
 
         // 2. UPDATE VALUES FROM UI
         roomCount = (int)roomCountSlider.value;
+
+        // DYNAMIC GRID CALCULATION
+        // Calculate average room size based on sliders
+        int avgRoomSize = (int)((minWidthSlider.value + maxWidthSlider.value) / 2f
+            * (minHeightSlider.value + maxHeightSlider.value) / 2f);
+
+        // Estimate grid area needed
+        int totalAreaNeeded = roomCount * avgRoomSize * 2;
+
+        // Resize grid to fit estimated area needed
+        int newGridSize = Mathf.CeilToInt(Mathf.Sqrt(totalAreaNeeded));
+        gridWidth = newGridSize;
+        gridHeight = newGridSize;
 
         // Widths
         minW = (int)minWidthSlider.value;
@@ -132,12 +154,19 @@ public class DungeonGenerator : MonoBehaviour
                 CreateCorridor(rooms[i], rooms[i + 1]);
             }
         }
+        // Update bounds
+        tilemap.CompressBounds();
+
         // 5. PAINT WALLS
         PaintWalls();
+
+        // 6. UPDATE CAMERA
+        UpdateCamera();
 
         Debug.Log($"Generated {rooms.Count} rooms.");
     }
 
+    // Helper for seeds
     private void InitSeed()
     {
         // Text box for seed
@@ -168,6 +197,7 @@ public class DungeonGenerator : MonoBehaviour
         return false;
     }
 
+    // Create connecting corridors between rooms
     private void CreateCorridor(Room roomA, Room roomB)
     {
         // Get centers of room pairs
@@ -217,7 +247,7 @@ public class DungeonGenerator : MonoBehaviour
 
         // 1. Paint main room
         PaintRect(room.x, room.y, room.width, room.height);
-        /*
+        
         //  2. Wing logic
         if (Random.value > 0.5f) {
 
@@ -273,7 +303,7 @@ public class DungeonGenerator : MonoBehaviour
 
             PaintRect(wingX, wingY, wingW, wingH);
         }
-        */
+        
     }
 
     // Helper to paint walls of rooms
@@ -320,6 +350,18 @@ public class DungeonGenerator : MonoBehaviour
         if (tilemap.GetTile(pos + Vector3Int.left) == floorTile) return true;
         if (tilemap.GetTile(pos + Vector3Int.right) == floorTile) return true;
         return false;
+    }
+
+    private void UpdateCamera()
+    {
+        if (mainCamera == null) return;
+
+        // Center camera on grid
+        Vector3 center = new Vector3(gridWidth / 2f, gridHeight / 2, -10);
+        mainCamera.transform.position = center;
+
+        // Zoom out to fit the height
+        mainCamera.orthographicSize = (gridHeight / 2f) + 5;
     }
 
     private void OnDrawGizmos()
