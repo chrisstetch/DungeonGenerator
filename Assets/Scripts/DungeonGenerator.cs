@@ -35,6 +35,11 @@ public class DungeonGenerator : MonoBehaviour
     public GameObject playerPrefab;
     public GameObject exitPrefab;
     public GameObject lootPrefab;
+    public GameObject enemyPrefab;
+
+    [Header("Pathfinding")]
+    public Pathfinder pathfinder;
+    public LineRenderer lineRenderer;
 
     // Track spawned objects
     private List<GameObject> spawnedObjects = new List<GameObject>();
@@ -166,6 +171,10 @@ public class DungeonGenerator : MonoBehaviour
         // 7. SPAWN ENTITIES
         SpawnEntities();
 
+        // 8. SOLVE
+        SolveDungeon();
+
+        // Debugging
         Debug.Log($"Generated {rooms.Count} rooms.");
     }
 
@@ -383,18 +392,28 @@ public class DungeonGenerator : MonoBehaviour
             new Vector3(endPos.x, endPos.y, -1), Quaternion.identity);
         spawnedObjects.Add(e);
 
-        // Spawn loot
+        // Spawn loot and enemies
         foreach (Room r in rooms)
         {
             if (r == startRoom || r == endRoom) continue;
-            
-            // 20% change per room and not in start or end room
-            if (Random.value < 0.2f && lootPrefab != null)
+
+            float roll = Random.value;
+
+            // 20% chance for loot
+            if (roll < 0.2f)
             {
                 Vector2Int lootPos = r.GetCenter();
                 GameObject l = Instantiate(lootPrefab,
                     new Vector3(lootPos.x, lootPos.y, -1), Quaternion.identity);
                 spawnedObjects.Add(l);
+            }
+            // 20% chance for enemy
+            else if (roll > 0.8f)
+            {
+                Vector2Int enemyPos = r.GetCenter();
+                GameObject enemy = Instantiate(enemyPrefab,
+                    new Vector3(enemyPos.x, enemyPos.y, -1), Quaternion.identity);
+                spawnedObjects.Add(enemy);
             }
         }
     }
@@ -409,6 +428,29 @@ public class DungeonGenerator : MonoBehaviour
 
         // Zoom out to fit the height
         mainCamera.orthographicSize = (gridHeight / 2f) + 5;
+    }
+
+    private void SolveDungeon()
+    {
+        // Get positions of start and end GameObjects
+        Vector3Int startPos = tilemap.WorldToCell(spawnedObjects[0].transform.position);
+        Vector3Int endPos = tilemap.WorldToCell(spawnedObjects[1].transform.position);
+
+        // Find route between objects
+        List<Vector3Int> path = pathfinder.FindPath(startPos, endPos, tilemap, wallTile);
+        // Draw line
+        lineRenderer.positionCount = path.Count;
+        for (int i = 0; i < path.Count; i++)
+        {
+            // +0.5f to center the line
+            // Z = -2 to draw on top of everything
+            lineRenderer.SetPosition(i, new Vector3(path[i].x + 0.5f, path[i].y + 0.5f, -1));
+        }
+        if (path == null)
+        {
+            // Clear lines if no path found
+            lineRenderer.positionCount = 0;
+        }
     }
 
     private void OnDrawGizmos()
