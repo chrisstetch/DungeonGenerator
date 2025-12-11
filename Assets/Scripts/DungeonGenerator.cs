@@ -23,6 +23,8 @@ public class DungeonGenerator : MonoBehaviour
     public Slider minHeightSlider;
     public Slider maxHeightSlider;
     public InputField seedInput;
+    public Button generateButton;
+    public Toggle showPathToggle;
 
     [Header("UI Labels")]
     public Text countLabel;
@@ -39,7 +41,8 @@ public class DungeonGenerator : MonoBehaviour
 
     [Header("Pathfinding")]
     public Pathfinder pathfinder;
-    public LineRenderer lineRenderer;
+    public Tilemap pathTilemap;
+    public TileBase pathTile;
 
     // Track spawned objects
     private List<GameObject> spawnedObjects = new List<GameObject>();
@@ -62,6 +65,19 @@ public class DungeonGenerator : MonoBehaviour
 
         minHeightSlider.value = 5;
         maxHeightSlider.value = 15;
+
+        // Generate button
+        if (generateButton != null)
+        {
+            generateButton.onClick.AddListener(GenerateDungeon);
+        }
+
+        // Path toggle
+        if (showPathToggle != null)
+        {
+            showPathToggle.onValueChanged.AddListener(delegate { TogglePathVisibility(); });
+        }
+
 
         // Generate
         GenerateDungeon();
@@ -173,6 +189,7 @@ public class DungeonGenerator : MonoBehaviour
 
         // 8. SOLVE
         SolveDungeon();
+        TogglePathVisibility();
 
         // Debugging
         Debug.Log($"Generated {rooms.Count} rooms.");
@@ -432,26 +449,34 @@ public class DungeonGenerator : MonoBehaviour
 
     private void SolveDungeon()
     {
-        // Get positions of start and end GameObjects
+        // Clear old path
+        if (pathTilemap != null) pathTilemap.ClearAllTiles();
+
+        // Get positions
         Vector3Int startPos = tilemap.WorldToCell(spawnedObjects[0].transform.position);
         Vector3Int endPos = tilemap.WorldToCell(spawnedObjects[1].transform.position);
 
-        // Find route between objects
+        // Find Path
         List<Vector3Int> path = pathfinder.FindPath(startPos, endPos, tilemap, wallTile);
-        // Draw line
-        lineRenderer.positionCount = path.Count;
-        for (int i = 0; i < path.Count; i++)
+
+        // Paint path tiles
+        if (path != null && pathTilemap != null && pathTile != null)
         {
-            // +0.5f to center the line
-            // Z = -2 to draw on top of everything
-            lineRenderer.SetPosition(i, new Vector3(path[i].x + 0.5f, path[i].y + 0.5f, -1));
-        }
-        if (path == null)
-        {
-            // Clear lines if no path found
-            lineRenderer.positionCount = 0;
+            foreach (Vector3Int pos in path)
+            {
+                pathTilemap.SetTile(pos, pathTile);
+            }
         }
     }
+
+    public void TogglePathVisibility()
+    {
+        if (pathTilemap != null && showPathToggle != null)
+        {
+            pathTilemap.gameObject.SetActive(showPathToggle.isOn);
+        }
+    }
+
 
     private void OnDrawGizmos()
     {
