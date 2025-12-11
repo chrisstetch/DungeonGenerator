@@ -1420,6 +1420,9 @@ MonoBehaviour:
   maxWidthLabel: {fileID: 893048730}
   minHeightLabel: {fileID: 505918456}
   maxHeightLabel: {fileID: 1248296265}
+  playerPrefab: {fileID: 3900888644217450830, guid: 8751f34705bb2e9428115d755aa9b8b0, type: 3}
+  exitPrefab: {fileID: 7995157535621751713, guid: e4f107a3cbaf1ef48bb8769ef6f0a86d, type: 3}
+  lootPrefab: {fileID: 2350981330224033246, guid: fbdce551dd8a63e42a8e570d149487fd, type: 3}
 --- !u!4 &817572639
 Transform:
   m_ObjectHideFlags: 0

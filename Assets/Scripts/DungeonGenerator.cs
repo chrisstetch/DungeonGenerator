@@ -163,6 +163,9 @@ public class DungeonGenerator : MonoBehaviour
         // 6. UPDATE CAMERA
         UpdateCamera();
 
+        // 7. SPAWN ENTITIES
+        SpawnEntities();
+
         Debug.Log($"Generated {rooms.Count} rooms.");
     }
 
@@ -350,6 +353,50 @@ public class DungeonGenerator : MonoBehaviour
         if (tilemap.GetTile(pos + Vector3Int.left) == floorTile) return true;
         if (tilemap.GetTile(pos + Vector3Int.right) == floorTile) return true;
         return false;
+    }
+
+    // Spawns entities on map
+    private void SpawnEntities()
+    {
+        // Delete old entities
+        foreach (GameObject obj in spawnedObjects)
+        {
+            if (obj != null) Destroy(obj);
+        }
+        spawnedObjects.Clear();
+
+        if (rooms.Count == 0) return;
+
+        // Start and end rooms
+        Room startRoom = rooms[0];
+        Room endRoom = rooms[rooms.Count - 1];
+
+        // Spawn player
+        Vector2Int startPos = startRoom.GetCenter();
+        GameObject p = Instantiate(playerPrefab, 
+            new Vector3(startPos.x, startPos.y, -1), Quaternion.identity);
+        spawnedObjects.Add(p);
+
+        // Spawn exit
+        Vector2Int endPos = endRoom.GetCenter();
+        GameObject e = Instantiate(exitPrefab,
+            new Vector3(endPos.x, endPos.y, -1), Quaternion.identity);
+        spawnedObjects.Add(e);
+
+        // Spawn loot
+        foreach (Room r in rooms)
+        {
+            if (r == startRoom || r == endRoom) continue;
+            
+            // 20% change per room and not in start or end room
+            if (Random.value < 0.2f && lootPrefab != null)
+            {
+                Vector2Int lootPos = r.GetCenter();
+                GameObject l = Instantiate(lootPrefab,
+                    new Vector3(lootPos.x, lootPos.y, -1), Quaternion.identity);
+                spawnedObjects.Add(l);
+            }
+        }
     }
 
     private void UpdateCamera()
