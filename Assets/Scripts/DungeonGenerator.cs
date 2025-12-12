@@ -567,7 +567,7 @@ public class DungeonGenerator : MonoBehaviour
         }
         else
         {
-            seedName = System.DateTime.Now.ToString("HHmmss_yyyyMMdd");
+            seedName = System.DateTime.Now.ToString("HHmmss");
         }
 
         // Filename and path
