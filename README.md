@@ -41,7 +41,7 @@ Level generation is a challenge in game development, requiring significant manua
 | **Reset Defaults Button** | Instantly reverts all sliders and the seed field to the original values. |
 | **Sliders** | Control Room Count, Min/Max Width/Height. |
 | **Seed Input** | Enter a specific text string (e.g., "CASTLE") to regenerate the same map layout. |
-| **Generate Button ** | Force immediate regeneration with current parameters. |
+| **Generate Button** | Force immediate regeneration with current parameters. |
 
 ### 2. Utility and Validation
 | Control | Function |
