@@ -572,6 +572,8 @@ public class DungeonGenerator : MonoBehaviour
 
         // Filename and path
         string path = "Assets/SavedDungeons";
+        if (!System.IO.Directory.Exists(path)) System.IO.Directory.CreateDirectory(path);
+
         string fileName = $"Dungeon_{seedName}.prefab";
         string localPath = path + "/" + fileName;
 
