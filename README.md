@@ -9,8 +9,8 @@ Level generation is a challenge in game development, requiring significant manua
 ### 2. System Contributions
 * **Controlled Space Packing:** Uses collision-checked room placement alongside a dynamic scaling model to ensure rooms are placed efficiently.
 * **A\* Validation Layer:** A dedicated pathfinding system to guarantee a path from start to end.
-* **Designer Workflow:** Simplifies level design time and provides instant generation and visual feedback, and the ability to saved the generated level as a prefab. 
-* 
+* **Designer Workflow:** Simplifies level design time and provides instant generation and visual feedback, and the ability to saved the generated level as a prefab.
+  
 ## Key Features
 * **Parametric Control:** Users control room count and min/max room dimensions via UI sliders.
 *  **Dynamic Scaling:** The underlying grid size automatically scales based on input parameters to minimize void space and maximize room placement success.
