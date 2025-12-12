@@ -1631,6 +1631,7 @@ GameObject:
   - component: {fileID: 817572639}
   - component: {fileID: 817572638}
   - component: {fileID: 817572641}
+  - component: {fileID: 817572642}
   m_Layer: 0
   m_Name: Generator
   m_TagString: Untagged
@@ -1656,21 +1657,11 @@ MonoBehaviour:
   mainCamera: {fileID: 519420031}
   gridWidth: 50
   gridHeight: 50
-  roomCountSlider: {fileID: 1201048274}
-  minWidthSlider: {fileID: 531633403}
-  maxWidthSlider: {fileID: 308230830}
-  minHeightSlider: {fileID: 1842881262}
-  maxHeightSlider: {fileID: 1910506110}
-  seedInput: {fileID: 460167418}
-  generateButton: {fileID: 2116249183}
-  resetButton: {fileID: 123455827}
-  saveButton: {fileID: 21079599}
-  showPathToggle: {fileID: 1959737219}
-  countLabel: {fileID: 2101490111}
-  minWidthLabel: {fileID: 246682562}
-  maxWidthLabel: {fileID: 893048730}
-  minHeightLabel: {fileID: 505918456}
-  maxHeightLabel: {fileID: 1248296265}
+  roomCount: 0
+  minW: 0
+  maxW: 0
+  minH: 0
+  maxH: 0
   playerPrefab: {fileID: 3900888644217450830, guid: 8751f34705bb2e9428115d755aa9b8b0, type: 3}
   exitPrefab: {fileID: 7995157535621751713, guid: e4f107a3cbaf1ef48bb8769ef6f0a86d, type: 3}
   lootPrefab: {fileID: 2350981330224033246, guid: fbdce551dd8a63e42a8e570d149487fd, type: 3}
@@ -1705,6 +1696,34 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6aedcda870fbb11418753a0f34d45689, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &817572642
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 817572637}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: beb266cb6eeb0074a9a5a687cf72de41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  dungeonGenerator: {fileID: 817572638}
+  roomCountSlider: {fileID: 1201048274}
+  minWidthSlider: {fileID: 531633403}
+  maxWidthSlider: {fileID: 308230830}
+  minHeightSlider: {fileID: 1842881262}
+  maxHeightSlider: {fileID: 1910506110}
+  seedInput: {fileID: 460167418}
+  generateButton: {fileID: 2116249183}
+  resetButton: {fileID: 123455827}
+  saveButton: {fileID: 21079599}
+  showPathToggle: {fileID: 1959737219}
+  countLabel: {fileID: 2101490111}
+  minWidthLabel: {fileID: 246682562}
+  maxWidthLabel: {fileID: 893048730}
+  minHeightLabel: {fileID: 505918456}
+  maxHeightLabel: {fileID: 1248296265}
 --- !u!1 &837858640
 GameObject:
   m_ObjectHideFlags: 0

@@ -2,8 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
-using UnityEngine.UI;
+#if UNITY_EDITOR
 using UnityEditor;
+#endif
 
 public class DungeonGenerator : MonoBehaviour
 {
@@ -13,30 +14,12 @@ public class DungeonGenerator : MonoBehaviour
     public TileBase wallTile;
     public Camera mainCamera;
 
-    [Header("Dungeon Settings")]
+    [Header("Dungeon Settings (Set by UI)")]
     public int gridWidth = 100;
     public int gridHeight = 100;
 
-    [Header("UI Controls")]
-    public Slider roomCountSlider;
-    public Slider minWidthSlider;
-    public Slider maxWidthSlider;
-    public Slider minHeightSlider;
-    public Slider maxHeightSlider;
-    public InputField seedInput;
-
-    [Header("UI Buttons")]
-    public Button generateButton;
-    public Button resetButton;
-    public Button saveButton;
-    public Toggle showPathToggle;
-
-    [Header("UI Labels")]
-    public Text countLabel;
-    public Text minWidthLabel;
-    public Text maxWidthLabel;
-    public Text minHeightLabel;
-    public Text maxHeightLabel;
+    public int roomCount;
+    public int minW, maxW, minH, maxH;
 
     [Header("Spawning")]
     public GameObject playerPrefab;
@@ -52,44 +35,8 @@ public class DungeonGenerator : MonoBehaviour
     // Track spawned objects
     private List<GameObject> spawnedObjects = new List<GameObject>();
 
-    // Internal variables
-    private int roomCount;
-    private int minW, maxW, minH, maxH;
-
     // List to store generated rooms
     private List<Room> rooms = new List<Room>();
-
-    // Start is called before the first frame update
-    void Start()
-    {
-        // Set default values
-        SetDefaults();
-
-        // Reset button
-        if (resetButton != null) resetButton.onClick.AddListener(SetDefaults);
-
-        // Save button
-        if (saveButton != null) saveButton.onClick.AddListener(SaveDungeon);
-
-        // Generate button
-        if (generateButton != null) generateButton.onClick.AddListener(GenerateDungeon);
-
-        // Path toggle
-        if (showPathToggle != null) showPathToggle.onValueChanged.AddListener(delegate { TogglePathVisibility(); });
-
-        // Generate
-        GenerateDungeon();
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        // UI text updating
-        UpdateUILabels();
-
-        // Regenerate rooms for testing
-        if (Input.GetKeyDown(KeyCode.Space)) GenerateDungeon();
-    }
 
     /// <summary>
     /// MAIN FUNCTION
@@ -98,9 +45,7 @@ public class DungeonGenerator : MonoBehaviour
     /// </summary>
     public void GenerateDungeon()
     {
-        // 1. Setup & Input
-        InitSeed();
-        ReadUIValues();
+        // 1. Setup & Input 
         CalculateDynamicGrid();
         ClearMap();
 
@@ -116,7 +61,6 @@ public class DungeonGenerator : MonoBehaviour
         // 4. Gameplay Elements and Validation
         SpawnEntities();
         SolveDungeon();
-        TogglePathVisibility();
 
         // Debugging
         Debug.Log($"Generated {rooms.Count} rooms.");
@@ -126,9 +70,9 @@ public class DungeonGenerator : MonoBehaviour
     // CORE PIPELINE FUNCTIONS
     // ========================================================================
 
-    /// <summary>
-    /// Places set number of rooms within grid boundaries
-    /// </summary>
+    /// <summary>
+    /// Places set number of rooms within grid boundaries
+    /// </summary>
     private void PlaceRooms()
     {
         // Prevent infinite loops
@@ -330,9 +274,10 @@ public class DungeonGenerator : MonoBehaviour
 
         // 1. Paint main room
         PaintRect(room.x, room.y, room.width, room.height);
-        
+
         //  2. Wing logic
-        if (Random.value > 0.5f) {
+        if (Random.value > 0.5f)
+        {
 
             // Pick random direction vector
             Vector2Int[] directions = { Vector2Int.up, Vector2Int.down, Vector2Int.right, Vector2Int.left };
@@ -386,7 +331,7 @@ public class DungeonGenerator : MonoBehaviour
 
             PaintRect(wingX, wingY, wingW, wingH);
         }
-        
+
     }
 
     // Helper to paint walls of rooms
@@ -448,48 +393,11 @@ public class DungeonGenerator : MonoBehaviour
         mainCamera.orthographicSize = (gridHeight / 2f) + 5;
     }
 
-    // ========================================================================
-    // SETUP HELPERS
-    // ========================================================================
-    
-    // Sets up and generates seed
-    private void InitSeed()
-    {
-        // Text box for seed
-        if (seedInput != null && seedInput.text.Length > 0)
-        {
-            int seed = seedInput.text.GetHashCode();
-            Random.InitState(seed);
-        }
-        // Use current time to generate seed if no seed entered
-        else
-        {
-            Random.InitState(System.DateTime.Now.Millisecond);
-        }
-    }
-
-    // Reads values from UI sliders
-    private void ReadUIValues()
-    {
-        // Room count
-        roomCount = (int)roomCountSlider.value;
-
-        // Widths
-        minW = (int)minWidthSlider.value;
-        maxW = (int)maxWidthSlider.value;
-        if (maxW < minW) maxW = minW;
-
-        // Heights
-        minH = (int)minHeightSlider.value;
-        maxH = (int)maxHeightSlider.value;
-        if (maxH < minH) maxH = minH;
-    }
-
     // Calculates dynamic grid size based on room properties
     private void CalculateDynamicGrid()
     {
         // Calculate average room size based on sliders
-        int avgRoomSize = (int)((minW + maxW) / 2f * (minH + maxH) / 2f);
+        int avgRoomSize = (int)((minW + maxW) / 2f * (minH + maxH) / 2f);
 
         // Estimate grid area needed
         int totalAreaNeeded = Mathf.CeilToInt(roomCount * avgRoomSize * 2f);
@@ -515,61 +423,12 @@ public class DungeonGenerator : MonoBehaviour
         spawnedObjects.Clear();
     }
 
-    // Toggles visibility of generated optimal path
-    public void TogglePathVisibility()
-    {
-        if (pathTilemap != null && showPathToggle != null)
-        {
-            pathTilemap.gameObject.SetActive(showPathToggle.isOn);
-        }
-    }
-
-    // ========================================================================
-    // UI & UTILITY FUNCTIONS
-    // ========================================================================
-
-    // Updates UI labels based on selection
-    private void UpdateUILabels()
-    {
-        if (countLabel) countLabel.text = "Room count: " + roomCountSlider.value;
-        if (minWidthLabel) minWidthLabel.text = "Min width: " + minWidthSlider.value;
-        if (maxWidthLabel) maxWidthLabel.text = "Max width: " + maxWidthSlider.value;
-        if (minHeightLabel) minHeightLabel.text = "Min height: " + minHeightSlider.value;
-        if (maxHeightLabel) maxHeightLabel.text = "Max height: " + maxHeightSlider.value;
-    }
-
-    // Sets default room property values
-    public void SetDefaults()
-    {
-        if (roomCountSlider) roomCountSlider.value = 10;
-
-        if (minWidthSlider) minWidthSlider.value = 5;
-        if (maxWidthSlider) maxWidthSlider.value = 15;
-
-        if (minHeightSlider) minHeightSlider.value = 5;
-        if (maxHeightSlider) maxHeightSlider.value = 15;
-
-        if (seedInput) seedInput.text = "";
-        if (showPathToggle) showPathToggle.isOn = false;
-    }
-
     /// <summary>
     /// Saves the current dungeon grid as a prefab asset
     /// </summary>
-    public void SaveDungeon()
+#if UNITY_EDITOR
+    public void SaveDungeon(string seedName)
     {
-        // Get seed string
-        string seedName;
-        if (seedInput != null && seedInput.text.Length > 0)
-        {
-            // Replaces spaces with "_"
-            seedName = seedInput.text.Replace(" ", "_").Trim();
-        }
-        else
-        {
-            seedName = System.DateTime.Now.ToString("HHmmss");
-        }
-
         // Filename and path
         string path = "Assets/SavedDungeons";
         if (!System.IO.Directory.Exists(path)) System.IO.Directory.CreateDirectory(path);
@@ -578,9 +437,10 @@ public class DungeonGenerator : MonoBehaviour
         string localPath = path + "/" + fileName;
 
         // Save the grid
-        UnityEditor.PrefabUtility.SaveAsPrefabAsset(tilemap.transform.parent.gameObject, localPath);
+        PrefabUtility.SaveAsPrefabAsset(tilemap.transform.parent.gameObject, localPath);
         Debug.Log($"<color=cyan>SUCCESS:</color> Dungeon saved as <b>{fileName}</b> at {path}");
     }
+#endif
 
     // Unity Gizmos for rooms
     private void OnDrawGizmos()
