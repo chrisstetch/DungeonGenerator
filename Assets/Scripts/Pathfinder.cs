@@ -3,6 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
+
+/// <summary>
+/// Implements the A* pathfinding algorithm to find the most efficent dungeon path
+/// </summary>
 public class Pathfinder : MonoBehaviour
 {
     private class Node
@@ -18,9 +22,14 @@ public class Pathfinder : MonoBehaviour
             get { return gCost + hCost; }
         }
     }
-
-    // Main function to find path
-    // Main function to find path
+    /// <summary>
+    /// Finds the shortest path between two points on the tilemap, avoiding wall tiles
+    /// </summary>
+    /// <param name="startPos"> The starting grid node position</param>
+    /// <param name="endPos">The target grid node position</param>
+    /// <param name="tilemap">The tilemap used to check for walkability</param>
+    /// <param name="wallTile">The tilemap considered a barrier</param>
+    /// <returns>A list of Vector3Int positions forming the path</returns>
     public List<Vector3Int> FindPath(Vector3Int startPos, Vector3Int endPos, Tilemap tilemap, TileBase wallTile)
     {
         // Start and end nodes
@@ -108,7 +117,9 @@ public class Pathfinder : MonoBehaviour
         return null;
     }
 
-    // Helper to get pos of node's neighbours
+    /// <summary>
+    /// Gets the positions of the 4 adjacent neighbor nodes
+    /// </summary>
     private List<Vector3Int> GetNeighbors(Vector3Int center)
     {
         List<Vector3Int> neighbors = new List<Vector3Int>();
@@ -119,7 +130,9 @@ public class Pathfinder : MonoBehaviour
         return neighbors;
     }
 
-    // Helper to get distance between nodes
+    /// <summary>
+    /// Calculates the Manhattan Distance (the heuristic) between two points on the grid.
+    /// </summary>
     private int GetDistance(Vector3Int posA, Vector3Int posB)
     {
         int distanceX = Mathf.Abs(posA.x - posB.x);
@@ -127,7 +140,9 @@ public class Pathfinder : MonoBehaviour
         return distanceX + distanceY;
     }
 
-    // Reconstructs path
+    /// <summary>
+    /// Reconstructs the final optimal path by tracing back from the end node to the start using parents
+    /// </summary>
     private List<Vector3Int> RetracePath(Node startNode, Node endNode)
     {
         List<Vector3Int> path = new List<Vector3Int>();

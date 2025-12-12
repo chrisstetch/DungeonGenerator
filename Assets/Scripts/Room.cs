@@ -19,13 +19,19 @@ public class Room
         this.height = height;
     }
 
-    // Helper to get center point
+    /// <summary>
+    /// Calculates the center point of the room on the grid
+    /// </summary>
     public Vector2Int GetCenter()
     {
         return new Vector2Int(x + width / 2, y + height / 2);
     }
 
-    // Helper to check if room overlaps
+    /// <summary>
+    /// Checks if this room overlaps with another room
+    /// </summary>
+    /// <param name="other">Other room to check against</param>
+    /// <returns>True if rooms overlap, false otherwise</returns>
     public bool Overlaps(Room other)
     {
         return (x < other.x + other.width) && (x + width > other.x) &&
