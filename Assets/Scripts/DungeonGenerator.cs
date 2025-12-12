@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 using UnityEngine.UI;
+using UnityEditor;
 
 public class DungeonGenerator : MonoBehaviour
 {
@@ -27,6 +28,7 @@ public class DungeonGenerator : MonoBehaviour
     [Header("UI Buttons")]
     public Button generateButton;
     public Button resetButton;
+    public Button saveButton;
     public Toggle showPathToggle;
 
     [Header("UI Labels")]
@@ -65,6 +67,9 @@ public class DungeonGenerator : MonoBehaviour
 
         // Reset button
         if (resetButton != null) resetButton.onClick.AddListener(SetDefaults);
+
+        // Save button
+        if (saveButton != null) saveButton.onClick.AddListener(SaveDungeon);
 
         // Generate button
         if (generateButton != null) generateButton.onClick.AddListener(GenerateDungeon);
@@ -546,6 +551,33 @@ public class DungeonGenerator : MonoBehaviour
 
         if (seedInput) seedInput.text = "";
         if (showPathToggle) showPathToggle.isOn = false;
+    }
+
+    /// <summary>
+    /// Saves the current dungeon grid as a prefab asset
+    /// </summary>
+    public void SaveDungeon()
+    {
+        // Get seed string
+        string seedName;
+        if (seedInput != null && seedInput.text.Length > 0)
+        {
+            // Replaces spaces with "_"
+            seedName = seedInput.text.Replace(" ", "_").Trim();
+        }
+        else
+        {
+            seedName = System.DateTime.Now.ToString("HHmmss_yyyyMMdd");
+        }
+
+        // Filename and path
+        string path = "Assets/SavedDungeons";
+        string fileName = $"Dungeon_{seedName}.prefab";
+        string localPath = path + "/" + fileName;
+
+        // Save the grid
+        UnityEditor.PrefabUtility.SaveAsPrefabAsset(tilemap.transform.parent.gameObject, localPath);
+        Debug.Log($"<color=cyan>SUCCESS:</color> Dungeon saved as <b>{fileName}</b> at {path}");
     }
 
     // Unity Gizmos for rooms
